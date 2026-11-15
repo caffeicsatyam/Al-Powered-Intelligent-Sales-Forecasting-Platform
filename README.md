@@ -1,2 +1,2 @@
 # Al-Powered-Intelligent-Sales-Forecasting-Platform
-Al-Powered Intelligent Sales Forecasting Platform using Predictive Analysis 
+## AI-Powered Intelligent Sales Forecasting Platform using Predictive Analytics 
