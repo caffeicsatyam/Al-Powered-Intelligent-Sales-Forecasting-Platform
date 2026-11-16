@@ -11,7 +11,8 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 sql_engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=sql_engine)
-Base = DeclarativeBase()
+class Base(DeclarativeBase):
+    pass
 
 def get_db():
     db = SessionLocal()

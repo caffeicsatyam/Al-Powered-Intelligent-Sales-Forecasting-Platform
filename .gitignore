@@ -1,3 +1,4 @@
 AI-Powered-Intelligent-Sales-Infosys/
 .env
 .venv
+__pycache__/*

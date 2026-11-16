@@ -1,73 +1,112 @@
-from datetime import datetime
+import json
+import os
 
-from typing import Optional
-
-from pydantic import (
-    BaseModel,
-    EmailStr,
-    ConfigDict,
-    Field
-)
+from google import genai
 
 
-class LeadCreate(BaseModel):
+def fallback_analysis(lead):
 
-    company_name: str = Field(min_length=1, max_length=200)
-    industry: str = Field(min_length=1, max_length=120)
-    contact_person: Optional[str] = None
-    email: Optional[EmailStr] = None
-    phone: Optional[str] = None
-    website: Optional[str] = None
-    employee_count: Optional[str] = None
-    location: Optional[str] = None
-    description: Optional[str] = None
-    technology_stack: Optional[str] = None
-    status: str = "New"
+    industry = lead.get("industry", "Unknown")
 
+    return {
 
-class LeadUpdate(BaseModel):
+        "company_overview":
+            f"{lead['company_name']} operates in {industry}. "
+            "This overview uses the information provided.",
 
-    company_name: Optional[str] = None
-    industry: Optional[str] = None
-    contact_person: Optional[str] = None
-    email: Optional[EmailStr] = None
-    phone: Optional[str] = None
-    website: Optional[str] = None
-    employee_count: Optional[str] = None
-    location: Optional[str] = None
-    description: Optional[str] = None
-    technology_stack: Optional[str] = None
-    status: Optional[str] = None
+        "business_needs": [
+            f"Review operational requirements in the {industry} sector",
+            "Identify technology and business improvement opportunities"
+        ],
 
+        "opportunities": [
+            "Explore business process automation",
+            "Evaluate software and cloud optimization opportunities"
+        ],
 
-class LeadOut(BaseModel):
+        "industry_analysis":
+            f"The company belongs to the {industry} industry. "
+            "Further market research is recommended.",
 
-    model_config = ConfigDict(from_attributes=True)
-    id: int
-    company_name: str
-    industry: str
-    contact_person: Optional[str]
-    email: Optional[str]
-    phone: Optional[str]
-    website: Optional[str]
-    employee_count: Optional[str]
-    location: Optional[str]
-    description: Optional[str]
-    technology_stack: Optional[str]
-    status: str
-    created_at: datetime
-    updated_at: datetime
+        "qualification_score": 50,
+
+        "recommended_action":
+            "Verify business requirements and contact the decision-maker."
+    }
 
 
-class AnalysisOut(BaseModel):
+def analyze_company(lead):
 
-    model_config = ConfigDict(from_attributes=True)
-    id: int
-    lead_id: int
-    company_overview: str
-    business_needs: str
-    opportunities: str
-    industry_analysis: str
-    qualification_score: int
-    recommended_action: str
-    generated_at: datetime
+    api_key = os.getenv("GEMINI_API_KEY")
+
+    if not api_key:
+        return fallback_analysis(lead)
+
+    client = genai.Client(api_key=api_key)
+
+    model = os.getenv(
+        "GEMINI_MODEL",
+        "gemini-2.5-flash"
+    )
+
+    prompt = f"""
+    You are an expert B2B sales intelligence assistant.
+
+    Analyse the following company information.
+
+    Company Information:
+
+    {json.dumps(lead)}
+
+    Generate:
+
+    1. Company Overview
+    2. Business Needs
+    3. Potential Business Opportunities
+    4. Industry Analysis
+    5. Qualification Score from 0 to 100
+    6. Recommended Action
+
+    Do not invent company facts.
+
+    Return ONLY valid JSON in this format:
+
+    {{
+        "company_overview": "Description",
+
+        "business_needs": [
+            "Need 1",
+            "Need 2"
+        ],
+
+        "opportunities": [
+            "Opportunity 1",
+            "Opportunity 2"
+        ],
+
+        "industry_analysis": "Industry details",
+
+        "qualification_score": 85,
+
+        "recommended_action": "Recommended action"
+    }}
+    """
+
+    response = client.models.generate_content(
+        model=model,
+        contents=prompt
+    )
+
+    raw = response.text.strip()
+
+    raw = raw.removeprefix("```json")
+    raw = raw.removesuffix("```").strip()
+
+    data = json.loads(raw)
+
+    data["qualification_score"] = max(
+        0,
+        min(100, int(data["qualification_score"]))
+    )
+
+    return data

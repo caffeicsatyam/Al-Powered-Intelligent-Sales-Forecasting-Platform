@@ -29,7 +29,6 @@ app.add_middleware(
 
 )
 
-
 # REGISTER ROUTERS
 app.include_router(leads.router)
 app.include_router(analysis.router)
