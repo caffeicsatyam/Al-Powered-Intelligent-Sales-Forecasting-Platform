@@ -1,16 +1,12 @@
 from datetime import datetime
-
 from sqlalchemy import (
     String,
     Integer,
     DateTime,
     Text
 )
-
 from sqlalchemy.orm import Mapped, mapped_column
-
 from .database import Base
-
 
 class Lead(Base):
 
@@ -94,8 +90,7 @@ class CompanyAnalysis(Base):
 
     __tablename__ = "company_analyses"
 
-    id: Mapped[int] = mapped_column(
-        Integer,
+    id: Mapped[int] = mapped_column(Integer,
         primary_key=True,
         index=True
     )
@@ -106,18 +101,12 @@ class CompanyAnalysis(Base):
     )
 
     company_overview: Mapped[str] = mapped_column(Text)
-
     business_needs: Mapped[str] = mapped_column(Text)
-
     opportunities: Mapped[str] = mapped_column(Text)
-
     industry_analysis: Mapped[str] = mapped_column(Text)
-
     qualification_score: Mapped[int] = mapped_column(Integer)
-
     recommended_action: Mapped[str] = mapped_column(Text)
-
     generated_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow
+        default=datetime.astimezone
     )

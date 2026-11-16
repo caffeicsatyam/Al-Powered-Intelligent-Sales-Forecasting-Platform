@@ -1,8 +1,8 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .database import Base, engine
-from .routers import leads, analysis
+from database import Base, engine
+from router import leads, analysis
 
 
 @asynccontextmanager
@@ -12,13 +12,12 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="SalesGenie AI",
+    title="Sales AI",
     description="AI Sales Assistant and Lead Intelligence Platform",
     version="1.0.0",
     lifespan=lifespan
 
 )
-
 
 # CORS CONFIGURATION
 app.add_middleware(
@@ -34,7 +33,6 @@ app.add_middleware(
 # REGISTER ROUTERS
 app.include_router(leads.router)
 app.include_router(analysis.router)
-
 
 @app.get("/")
 def home():

@@ -4,7 +4,6 @@ from ..database import get_db
 from .. import models, schemas
 from ..services import analyze_company
 
-
 router = APIRouter(
     prefix='/api/analysis',
     tags=['Company Intelligence']
@@ -34,7 +33,8 @@ def create_analysis(
         "industry": lead.industry,
         "contact_person": lead.contact_person,
         "website": lead.website,
-        # whatever there is
+        # Whatever there is present
+        
 
     }
 
