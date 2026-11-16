@@ -12,20 +12,15 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-
     title="SalesGenie AI",
-
     description="AI Sales Assistant and Lead Intelligence Platform",
-
     version="1.0.0",
-
     lifespan=lifespan
 
 )
 
 
 # CORS CONFIGURATION
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
