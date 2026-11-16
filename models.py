@@ -6,7 +6,7 @@ from sqlalchemy import (
     Text
 )
 from sqlalchemy.orm import Mapped, mapped_column
-from .database import Base
+from database import Base
 
 class Lead(Base):
 

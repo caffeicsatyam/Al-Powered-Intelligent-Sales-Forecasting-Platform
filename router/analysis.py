@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from ..database import get_db
-from .. import models, schemas
-from ..services import analyze_company
+from database import get_db
+import models, schemas
+from services import analyze_company
 
 router = APIRouter(
     prefix='/api/analysis',
@@ -34,7 +34,7 @@ def create_analysis(
         "contact_person": lead.contact_person,
         "website": lead.website,
         # Whatever there is present
-        
+
 
     }
 
