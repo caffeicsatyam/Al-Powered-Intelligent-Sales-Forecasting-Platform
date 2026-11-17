@@ -6,3 +6,4 @@ pydantic[email]
 email-validator
 python-dotenv
 google-genai
+streamlit

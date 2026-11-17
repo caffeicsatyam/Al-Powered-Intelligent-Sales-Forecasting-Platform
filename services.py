@@ -1,13 +1,9 @@
 import json
 import os
-
 from google import genai
 
-
 def fallback_analysis(lead):
-
     industry = lead.get("industry", "Unknown")
-
     return {
 
         "company_overview":
@@ -46,20 +42,15 @@ def analyze_company(lead):
 
     model = os.getenv(
         "GEMINI_MODEL",
-        "gemini-2.5-flash"
+        "gemini-3.1-flash-lite"
     )
 
     prompt = f"""
     You are an expert B2B sales intelligence assistant.
-
     Analyse the following company information.
-
     Company Information:
-
     {json.dumps(lead)}
-
     Generate:
-
     1. Company Overview
     2. Business Needs
     3. Potential Business Opportunities
@@ -91,17 +82,14 @@ def analyze_company(lead):
         "recommended_action": "Recommended action"
     }}
     """
-
     response = client.models.generate_content(
         model=model,
         contents=prompt
     )
 
     raw = response.text.strip()
-
     raw = raw.removeprefix("```json")
     raw = raw.removesuffix("```").strip()
-
     data = json.loads(raw)
 
     data["qualification_score"] = max(

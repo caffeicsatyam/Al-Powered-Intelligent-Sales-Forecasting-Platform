@@ -1,3 +1,4 @@
+# Defines how data is validated and returned through APIs and reqests schemas
 from typing import Optional
 from pydantic import (
     Field,

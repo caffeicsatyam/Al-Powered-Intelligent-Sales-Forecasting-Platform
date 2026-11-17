@@ -1,3 +1,4 @@
+# Hadles Analysis Requests
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
@@ -19,7 +20,7 @@ def create_analysis(
     db: Session = Depends(get_db)
 ):
 
-    lead = db.get(models.lead, lead_id)
+    lead = db.get(models.Lead, lead_id)
 
     if not lead:
 
@@ -33,7 +34,10 @@ def create_analysis(
         "industry": lead.industry,
         "contact_person": lead.contact_person,
         "website": lead.website,
-        # Whatever there is present
+        "employee_count": lead.employee_count,
+        "location": lead.location,
+        "description": lead.description,
+        "technology_stack": lead.technology_stack
 
 
     }
@@ -63,9 +67,7 @@ def create_analysis(
         ),
 
         industry_analysis=result["industry_analysis"],
-
         qualification_score=result["qualification_score"],
-
         recommended_action=result["recommended_action"]
 
     )

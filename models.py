@@ -1,3 +1,4 @@
+# 
 from datetime import datetime
 from sqlalchemy import (
     String,
@@ -9,7 +10,6 @@ from sqlalchemy.orm import Mapped, mapped_column
 from database import Base
 
 class Lead(Base):
-
     __tablename__ = "leads"
 
     id: Mapped[int] = mapped_column(
@@ -81,8 +81,8 @@ class Lead(Base):
 
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.astimezone,
-        onupdate=datetime.astimezone
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
     )
 
 
@@ -108,5 +108,5 @@ class CompanyAnalysis(Base):
     recommended_action: Mapped[str] = mapped_column(Text)
     generated_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.astimezone
+        default=datetime.utcnow
     )

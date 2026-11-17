@@ -1,4 +1,4 @@
-# SalesGenie AI — AI Sales Assistant & Lead Intelligence Platform
+# Sales AI — AI Sales Assistant & Lead Intelligence Platform
 
 ## 2. Project Statement
 
