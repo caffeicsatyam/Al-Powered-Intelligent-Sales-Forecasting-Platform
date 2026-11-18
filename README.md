@@ -18,3 +18,18 @@
 - Predict lead conversion probability.
 - Generate AI-powered outreach recommendations.
 - Suggest effective follow-up strategies and customer engagement approaches.
+
+## Run the web app
+
+Configure `DATABASE_URL` in the environment or a `.env` file, install the packages in
+`requirements.txt`, and start the FastAPI server:
+
+```bash
+uvicorn main:app --reload
+```
+
+Open `http://127.0.0.1:8000/` for the dashboard. FastAPI serves the frontend from
+`static/`, keeps the API available under `/api/`, and exposes its interactive API
+documentation at `/docs`. The current API supports lead management and company
+intelligence; the sales forecasting screen remains informational until forecast
+and sales-history endpoints are implemented.
