@@ -1,9 +1,15 @@
 # Defines API endpoints and handles requests.
 from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from database import Base, sql_engine
-from router import leads, analysis
+from router import analysis, leads, outreach
+
+
+STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 
 @asynccontextmanager
@@ -33,12 +39,14 @@ app.add_middleware(
 # REGISTER ROUTERS
 app.include_router(leads.router)
 app.include_router(analysis.router)
+app.include_router(outreach.router)
+
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
 
 @app.get("/")
 def home():
-    return {
-        "message": "SalesGenie AI Backend Running Successfully"
-    }
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 @app.get("/health")
