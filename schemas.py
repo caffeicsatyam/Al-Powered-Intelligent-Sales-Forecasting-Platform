@@ -62,3 +62,24 @@ class AnalysisOut(BaseModel):
     qualification_score: int
     recommended_action: str
     generated_at: datetime
+
+
+class EmailDraftOut(BaseModel):
+    subject: str = Field(min_length=1)
+    body: str = Field(min_length=1)
+
+
+class LeadScoreOut(BaseModel):
+    score: int = Field(ge=0, le=100)
+    qualification_label: str
+    factors: list[str]
+    score_basis: str
+
+
+class OutreachRecommendationsOut(BaseModel):
+    recommended_next_action: str
+    suggested_channel: str
+    follow_up_timing: str
+    engagement_sequence: list[str]
+    information_sufficient: bool
+    missing_information: list[str]

@@ -1,6 +1,7 @@
 import json
 import os
 from collections import Counter
+from html import escape
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -64,7 +65,7 @@ def lead_label(lead: dict) -> str:
     return f"{lead['company_name']} · {lead['industry']} (#{lead['id']})"
 
 
-def render_lead_table(leads: list[dict], alt: str) -> None:
+def render_lead_table(leads: list[dict]) -> None:
     rows = [
         {
             "Company": lead["company_name"],
@@ -75,7 +76,7 @@ def render_lead_table(leads: list[dict], alt: str) -> None:
         }
         for lead in leads
     ]
-    st.dataframe(rows, hide_index=True, width="stretch", alt=alt)
+    st.dataframe(rows, hide_index=True, width="stretch")
 
 
 def render_dashboard(leads: list[dict]) -> None:
@@ -112,7 +113,6 @@ def render_dashboard(leads: list[dict]) -> None:
                 stage_rows,
                 x="Stage",
                 y="Leads",
-                alt="Lead count across the current pipeline stages",
             )
     with chart_columns[1]:
         with st.container(border=True):
@@ -126,12 +126,11 @@ def render_dashboard(leads: list[dict]) -> None:
                 x="Industry",
                 y="Leads",
                 horizontal=True,
-                alt="Lead count by industry, showing the most represented industries",
             )
 
     with st.container(border=True):
         st.subheader("Recently added leads")
-        render_lead_table(leads[:8], "The eight most recently added leads")
+        render_lead_table(leads[:8])
 
 
 def render_lead_management(leads: list[dict]) -> None:
@@ -194,7 +193,7 @@ def render_lead_management(leads: list[dict]) -> None:
         st.info("No leads match these filters.")
         return
 
-    render_lead_table(visible_leads, "Leads matching the selected search and stage filters")
+    render_lead_table(visible_leads)
     st.divider()
     st.subheader("Update a lead")
     selected_lead = st.selectbox(
@@ -326,24 +325,195 @@ def render_analysis(leads: list[dict]) -> None:
         st.write(analysis["industry_analysis"])
 
 
+def render_score_gauge(score: int, label: str) -> None:
+    angle = score * 3.6
+    accessible_label = escape(label)
+    st.html(
+        f"""
+        <div style="display:flex; flex-direction:column; align-items:center; gap:10px; padding:8px 0 12px">
+          <div role="img" aria-label="Qualification score {score} out of 100"
+               style="width:126px; height:126px; border-radius:50%;
+                      background:conic-gradient(#2864e8 0deg {angle:.1f}deg,
+                                               #e5eaf1 {angle:.1f}deg 360deg);
+                      display:grid; place-items:center">
+            <div style="width:102px; height:102px; border-radius:50%;
+                        background:white; display:grid; place-items:center;
+                        color:#15243b; font-size:30px; font-weight:700">
+              {score}
+            </div>
+          </div>
+          <div style="color:#68758a; font-size:14px">{accessible_label}</div>
+        </div>
+        """
+    )
+
+
+def render_outreach(leads: list[dict]) -> None:
+    st.badge(
+        "Milestone 2 · Weeks 3–4",
+        icon=":material/auto_awesome:",
+        color="blue",
+    )
+    st.header("Outreach generation & lead scoring")
+    st.caption("Personalized email drafts, qualification signals, and next-step guidance.")
+    if not leads:
+        st.info("Add a lead before preparing outreach.")
+        return
+
+    selected_lead = st.selectbox(
+        "Select a lead to review",
+        leads,
+        format_func=lead_label,
+        key="lead_for_outreach",
+    )
+    lead_id = selected_lead["id"]
+    st.caption("Qualification scores are heuristic guidance, not conversion probabilities.")
+
+    try:
+        score = api_request("GET", f"/api/outreach/{lead_id}/score")
+        recommendations = api_request(
+            "GET", f"/api/outreach/{lead_id}/recommendations"
+        )
+    except ApiError as exc:
+        st.error(str(exc))
+        return
+
+    email_column, score_column, strategy_column = st.columns(
+        [1.15, 0.9, 1.2], gap="medium"
+    )
+    draft_key = f"outreach_email_{lead_id}"
+    subject_key = f"subject_{lead_id}"
+    body_key = f"body_{lead_id}"
+
+    with email_column:
+        with st.container(border=True):
+            email_header, draft_badge = st.columns([3, 1])
+            email_header.markdown("**Email generator**")
+            draft_badge.badge("Draft", icon=":material/edit:", color="violet")
+            st.text_input(
+                "To",
+                value=selected_lead.get("email") or "",
+                placeholder="No email saved for this lead",
+                disabled=True,
+                key=f"recipient_{lead_id}",
+            )
+            st.caption(
+                "Generated from saved lead details and any company analysis."
+            )
+            if st.button(
+                "Generate email draft",
+                type="primary",
+                icon=":material/auto_awesome:",
+                width="stretch",
+                key=f"generate_outreach_email_{lead_id}",
+            ):
+                with st.spinner("Preparing a draft..."):
+                    try:
+                        generated_draft = api_request(
+                            "POST", f"/api/outreach/{lead_id}/email"
+                        )
+                        st.session_state[draft_key] = generated_draft
+                        st.session_state[subject_key] = generated_draft["subject"]
+                        st.session_state[body_key] = generated_draft["body"]
+                    except ApiError as exc:
+                        st.error(str(exc))
+
+            draft = st.session_state.get(draft_key)
+            st.text_input(
+                "Subject",
+                key=subject_key,
+                disabled=not bool(draft),
+                placeholder="Generate a draft to add a subject",
+            )
+            st.text_area(
+                "Email body",
+                height=220,
+                key=body_key,
+                disabled=not bool(draft),
+                placeholder="Your editable email draft will appear here.",
+            )
+            st.caption("Review and edit the draft. This app does not send email.")
+
+    with score_column:
+        with st.container(border=True):
+            st.markdown("**Lead score**")
+            st.badge("Heuristic estimate", color="blue")
+            score_value = int(score["score"])
+            render_score_gauge(score_value, score["qualification_label"])
+            st.caption("Qualification score · not a conversion probability")
+            st.progress(score_value / 100)
+            with st.expander("Scoring factors", expanded=True):
+                st.caption(score["score_basis"])
+                for factor in score["factors"]:
+                    st.markdown(f"- {factor}")
+
+    with strategy_column:
+        with st.container(border=True):
+            st.markdown("**Outreach strategy**")
+            if recommendations["information_sufficient"]:
+                st.badge("Ready to review", icon=":material/check_circle:", color="green")
+            else:
+                st.badge(
+                    "More details needed",
+                    icon=":material/info:",
+                    color="orange",
+                )
+
+            with st.container(border=True):
+                st.markdown("**Follow-up timing**")
+                st.write(recommendations["follow_up_timing"])
+            with st.container(border=True):
+                st.markdown("**Suggested channel**")
+                st.badge(recommendations["suggested_channel"], color="blue")
+                st.write(recommendations["recommended_next_action"])
+            with st.container(border=True):
+                st.markdown("**Content strategy**")
+                if selected_lead.get("description"):
+                    st.write(
+                        f"Use the saved company notes: {selected_lead['description']}"
+                    )
+                elif recommendations["information_sufficient"]:
+                    st.write(
+                        "Personalize from the saved company analysis. "
+                        "No prior interaction history is stored."
+                    )
+                else:
+                    st.write(
+                        "Add company notes or generate a company analysis before outreach."
+                    )
+                st.markdown("**Engagement sequence**")
+                for step in recommendations["engagement_sequence"]:
+                    st.markdown(f"- {step}")
+
+            if recommendations["missing_information"]:
+                st.warning(
+                    "Information to add: "
+                    + ", ".join(recommendations["missing_information"])
+                )
+
+
 def main() -> None:
     st.set_page_config(
         page_title="Sales AI",
         page_icon=":material/insights:",
         layout="wide",
-        initial_sidebar_state="expanded",
+        initial_sidebar_state="collapsed",
     )
 
-    with st.sidebar:
-        st.title("Sales AI")
-        st.caption("Sales intelligence workspace")
-        page = st.radio(
-            "Workspace",
-            ["Overview", "Lead management", "Company intelligence"],
-            label_visibility="collapsed",
-        )
-        st.divider()
-        st.caption(f"API · {API_BASE_URL}")
+    page = st.segmented_control(
+        "Workspace",
+        [
+            "Overview",
+            "Lead management",
+            "Company intelligence",
+            "Sales outreach",
+        ],
+        default="Overview",
+        key="workspace_navigation",
+        width="stretch",
+        label_visibility="collapsed",
+        required=True,
+    )
 
     try:
         leads = get_leads()
@@ -359,8 +529,10 @@ def main() -> None:
         render_dashboard(leads)
     elif page == "Lead management":
         render_lead_management(leads)
-    else:
+    elif page == "Company intelligence":
         render_analysis(leads)
+    else:
+        render_outreach(leads)
 
 
 if __name__ == "__main__":

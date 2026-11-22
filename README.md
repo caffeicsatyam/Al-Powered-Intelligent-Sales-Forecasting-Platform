@@ -30,6 +30,19 @@ uvicorn main:app --reload
 
 Open `http://127.0.0.1:8000/` for the dashboard. FastAPI serves the frontend from
 `static/`, keeps the API available under `/api/`, and exposes its interactive API
-documentation at `/docs`. The current API supports lead management and company
-intelligence; the sales forecasting screen remains informational until forecast
-and sales-history endpoints are implemented.
+documentation at `/docs`. The API supports lead management, company intelligence,
+and outreach workflows:
+
+- `POST /api/outreach/{lead_id}/email` returns an editable draft and never sends it.
+- `GET /api/outreach/{lead_id}/score` returns a heuristic score and its factors. It
+  is not a conversion probability.
+- `GET /api/outreach/{lead_id}/recommendations` returns a suggested action, channel,
+  timing, and engagement sequence. Recommendations note when saved details are
+  insufficient; interaction history is not currently tracked.
+
+Set `GEMINI_API_KEY` in the environment or `.env` file to enable AI-generated email
+drafts; without it, the app creates a basic draft from saved lead details. No email
+is sent by the application.
+
+The sales forecasting screen remains informational until forecast and sales-history
+endpoints are implemented.
