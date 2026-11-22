@@ -1,9 +1,9 @@
 # Hadles Analysis Requests
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import get_db
-import models, schemas
-from services import analyze_company
+from .. import models, schemas
+from ..database import get_db
+from ..services.ai_service import analyze_company
 
 router = APIRouter(
     prefix='/api/analysis',

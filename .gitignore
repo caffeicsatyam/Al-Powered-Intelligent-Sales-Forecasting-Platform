@@ -1,5 +1,5 @@
 AI-Powered-Intelligent-Sales-Infosys/
 .env
 .venv
-__pycache__/*
+__pycache__/
 sales.db

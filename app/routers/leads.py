@@ -8,9 +8,8 @@ from fastapi import (
 
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from database import get_db
-
-import models, schemas
+from .. import models, schemas
+from ..database import get_db
 
 
 router = APIRouter(
