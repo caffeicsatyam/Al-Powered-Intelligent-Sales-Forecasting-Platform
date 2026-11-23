@@ -1,4 +1,3 @@
-# Handles Request DB requests
 from fastapi import (
     APIRouter,
     Depends,
@@ -7,9 +6,12 @@ from fastapi import (
 )
 
 from sqlalchemy.orm import Session
+
 from sqlalchemy import or_
-from .. import models, schemas
+
 from ..database import get_db
+
+from .. import models, schemas
 
 
 router = APIRouter(
