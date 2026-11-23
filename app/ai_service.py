@@ -2,11 +2,20 @@ import os
 import json
 
 from google import genai
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+
+def get_gemini_api_key():
+    """Accept both the app's legacy name and Google's standard env var."""
+    return os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
 
 
 def generate_ai_response(prompt):
 
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = get_gemini_api_key()
 
     if not api_key:
         raise RuntimeError("Gemini API key is missing")

@@ -2,7 +2,7 @@ from pathlib import Path
 import joblib
 
 MODEL_PATH = (
-    Path(__file__).resolve().parent[1]/"ml"/"conversion_model.joblib"
+    Path(__file__).resolve().parents[1] / "ml" / "conversion_model.joblib"
 )
 
 def calculate_score(data):

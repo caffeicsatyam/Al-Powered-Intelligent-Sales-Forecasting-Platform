@@ -60,7 +60,7 @@ def score_lead(
 
         priority=priority,
 
-        conversion_probability=probability,
+        conversation_probability=probability,
 
         probability_source=source
 

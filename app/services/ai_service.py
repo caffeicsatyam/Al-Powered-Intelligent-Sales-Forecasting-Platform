@@ -3,6 +3,15 @@ import os
 from typing import Any, Mapping
 
 from google import genai
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+
+def get_gemini_api_key() -> str | None:
+    """Read either supported Gemini API key environment variable."""
+    return os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
 
 
 def fallback_analysis(lead):
@@ -36,7 +45,7 @@ def fallback_analysis(lead):
 
 def analyze_company(lead):
 
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = get_gemini_api_key()
 
     if not api_key:
         return fallback_analysis(lead)
@@ -45,7 +54,7 @@ def analyze_company(lead):
 
     model = os.getenv(
         "GEMINI_MODEL",
-        "gemini-3.1-flash-lite"
+        "gemini-2.5-flash"
     )
 
     prompt = f"""
@@ -159,12 +168,12 @@ def generate_personalized_email(
     lead: Mapping[str, Any], analysis: Mapping[str, Any] | None = None
 ) -> dict[str, str]:
     """Create a reviewable email draft using only the supplied lead and analysis."""
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = get_gemini_api_key()
     if not api_key:
         return _fallback_email_draft(lead, analysis)
 
     client = genai.Client(api_key=api_key)
-    model = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
+    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
     source_data = {
         "lead": {key: value for key, value in lead.items() if value is not None},
         "saved_company_analysis": dict(analysis) if analysis else None,
@@ -405,7 +414,7 @@ def recommend_outreach(
 
 
 def generate_ai_response(prompt: str) -> dict:
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = get_gemini_api_key()
     if not api_key:
         raise RuntimeError("Gemini API key is missing")
 
@@ -425,7 +434,7 @@ def generate_ai_response(prompt: str) -> dict:
 
 
 def generate_email(lead, service, tone, context=None):
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = get_gemini_api_key()
     if not api_key:
         company = lead.get("company_name", "your company")
         contact = lead.get("contact_person", "there")
@@ -489,7 +498,7 @@ def generate_recommendation(
     score,
     priority
 ):
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = get_gemini_api_key()
     if not api_key:
         return {
             "channel": "Email",
