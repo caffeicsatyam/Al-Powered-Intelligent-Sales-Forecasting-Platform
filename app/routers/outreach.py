@@ -9,7 +9,10 @@ from ..database import get_db
 from .. import models, schemas
 from ..services.ai_service import (
     generate_email,
-    generate_recommendation
+    generate_recommendation,
+    generate_personalized_email,
+    recommend_outreach,
+    score_lead
 )
 
 router = APIRouter(
@@ -32,11 +35,16 @@ def get_lead_data(lead):
     }
 
 
-# Generate personlized email
+# Generate personalized email
 
 @router.post(
-    "/generate({lead_id})",
+    "/generate/{lead_id}",
     response_model=schemas.EmailOut   
+)
+@router.post(
+    "/generate({lead_id})",
+    response_model=schemas.EmailOut,
+    include_in_schema=False
 )
 def create_email(
     lead_id: int,
@@ -164,9 +172,71 @@ def create_recommendation(
     )
 
     db.add(recommendation)
-
     db.commit()
-
     db.refresh(recommendation)
-
     return recommendation
+
+
+def _get_latest_analysis(db: Session, lead_id: int) -> models.CompanyAnalysis | None:
+    return (
+        db.query(models.CompanyAnalysis)
+        .filter(models.CompanyAnalysis.lead_id == lead_id)
+        .order_by(
+            models.CompanyAnalysis.generated_at.desc(),
+            models.CompanyAnalysis.id.desc(),
+        )
+        .first()
+    )
+
+
+def _analysis_data(
+    analysis: models.CompanyAnalysis | None,
+) -> dict | None:
+    if analysis is None:
+        return None
+    return {
+        "company_overview": analysis.company_overview,
+        "business_needs": analysis.business_needs,
+        "opportunities": analysis.opportunities,
+        "industry_analysis": analysis.industry_analysis,
+        "qualification_score": analysis.qualification_score,
+        "recommended_action": analysis.recommended_action,
+    }
+
+
+def _require_lead(db: Session, lead_id: int) -> models.Lead:
+    lead = db.get(models.Lead, lead_id)
+    if lead is None:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return lead
+
+
+@router.post("/{lead_id}/email", response_model=schemas.EmailDraftOut)
+def create_email_draft(lead_id: int, db: Session = Depends(get_db)):
+    lead = _require_lead(db, lead_id)
+    analysis = _get_latest_analysis(db, lead_id)
+    try:
+        return generate_personalized_email(
+            get_lead_data(lead), _analysis_data(analysis)
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502, detail=f"Email draft generation failed: {exc}"
+        ) from exc
+
+
+@router.get("/{lead_id}/score", response_model=schemas.LeadScoreOut)
+def get_lead_score(lead_id: int, db: Session = Depends(get_db)):
+    lead = _require_lead(db, lead_id)
+    analysis = _get_latest_analysis(db, lead_id)
+    return score_lead(get_lead_data(lead), _analysis_data(analysis))
+
+
+@router.get(
+    "/{lead_id}/recommendations",
+    response_model=schemas.OutreachRecommendationsOut,
+)
+def get_outreach_recommendations(lead_id: int, db: Session = Depends(get_db)):
+    lead = _require_lead(db, lead_id)
+    analysis = _get_latest_analysis(db, lead_id)
+    return recommend_outreach(get_lead_data(lead), _analysis_data(analysis))

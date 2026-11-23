@@ -4,7 +4,9 @@ from sqlalchemy import (
     String,
     Integer,
     DateTime,
-    Text
+    Text,
+    ForeignKey,
+    Float
 )
 from sqlalchemy.orm import Mapped, mapped_column
 from .database import Base
@@ -109,4 +111,123 @@ class CompanyAnalysis(Base):
     generated_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=datetime.utcnow
+    )
+
+
+class OutreachEmail(Base):
+
+    __tablename__ = "outreach_emails"
+
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, index=True
+    )
+
+    lead_id: Mapped[int] = mapped_column(
+        ForeignKey("leads.id"), index=True
+    )
+
+    recipient: Mapped[str] = mapped_column(
+        String(255), index=True
+    )
+
+    subject: Mapped[str] = mapped_column(
+        String(255)
+    )
+
+    body: Mapped[str] = mapped_column(
+        Text
+    )
+
+    tone: Mapped[str] = mapped_column(
+        String(50), default="Professional"
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow
+    )
+
+
+class LeadScore(Base):
+
+    __tablename__ = "lead_scores"
+
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, index=True
+    )
+
+    lead_id: Mapped[int] = mapped_column(
+        ForeignKey("leads.id"), index=True
+    )
+
+    company_growth: Mapped[int] = mapped_column(
+        Integer
+    )
+
+    industry_match: Mapped[int] = mapped_column(
+        Integer
+    )
+
+    technology_alignment: Mapped[int] = mapped_column(
+        Integer
+    )
+
+    business_need: Mapped[int] = mapped_column(
+        Integer
+    )
+
+    engagement_level: Mapped[int] = mapped_column(
+        Integer
+    )
+
+    total_score: Mapped[int] = mapped_column(
+        Integer
+    )
+
+    priority: Mapped[str] = mapped_column(
+        String(50)
+    )
+
+    conversation_probability: Mapped[float] = mapped_column(
+        Float, nullable=True
+    )
+
+    probability_source: Mapped[str] = mapped_column(
+        String(100), nullable=True, default="not_available"
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow
+    )
+
+
+class OutreachRecommendation(Base):
+
+    __tablename__ = "outreach_recommendations"
+
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, index=True
+    )
+
+    lead_id: Mapped[int] = mapped_column(
+        ForeignKey("leads.id"), index=True
+    )
+
+    channel: Mapped[str] = mapped_column(
+        String(50)
+    )
+
+    follow_up_timing: Mapped[str] = mapped_column(
+        String(50)
+    )
+
+    strategy: Mapped[str] = mapped_column(
+        Text
+    )
+
+    next_action: Mapped[str] = mapped_column(
+        Text
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow
     )
