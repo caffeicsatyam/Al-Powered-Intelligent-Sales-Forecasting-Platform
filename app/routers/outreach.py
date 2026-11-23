@@ -159,7 +159,6 @@ def create_recommendation(
         follow_up_timing=result["follow_up_timing"],
 
         strategy=result["strategy"],
-
         next_action=result["next_action"]
 
     )
