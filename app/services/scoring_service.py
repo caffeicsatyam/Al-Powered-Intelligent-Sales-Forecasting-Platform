@@ -1,5 +1,15 @@
 from pathlib import Path
 import joblib
+import pandas as pd
+
+
+FEATURES = (
+    "company_growth",
+    "industry_match",
+    "technology_alignment",
+    "business_need",
+    "engagement_level",
+)
 
 MODEL_PATH = (
     Path(__file__).resolve().parents[1] / "ml" / "conversion_model.joblib"
@@ -7,13 +17,9 @@ MODEL_PATH = (
 
 def calculate_score(data):
 
-    total_score = (
-        data["company_growth"]
-        + data["industry_match"]
-        + data["technology_alignment"]
-        + data["business_need"]
-        + data["engagement_level"]
-    )
+    # The inputs are each rated from 0 to 10. Normalize their sum to 0–100
+    # so priorities and API responses use the documented score scale.
+    total_score = round(sum(data[feature] for feature in FEATURES) / 50 * 100)
 
     if total_score >= 80:
         priority = "High"
@@ -33,12 +39,10 @@ def predict_conversion_probability(data):
         return None, "model_not_trained"
 
     model = joblib.load(MODEL_PATH)
-    features = [[
-        data["company_growth"],
-        data['industry_match'],
-        data["business_need"],
-        data["engagement_level"]
-    ]]
+    features = pd.DataFrame(
+        [{feature: data[feature] for feature in FEATURES}],
+        columns=FEATURES,
+    )
 
     probability = model.predict_proba(features)[0][1]
 
