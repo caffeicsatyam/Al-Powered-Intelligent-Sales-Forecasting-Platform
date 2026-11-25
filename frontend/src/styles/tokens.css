@@ -1,0 +1,80 @@
+:root {
+  /* Architectural paper & layered slate surfaces */
+  --bg-canvas: #F6F6F3;
+  --bg-rail: #EEEEEA;
+  --bg-surface: #FFFFFF;
+  --bg-surface-subtle: #FAF9F6;
+  --bg-surface-hover: #F2F2EE;
+  --bg-surface-active: #E8EAE4;
+
+  /* Typographic ink scale */
+  --ink-primary: #111820;
+  --ink-secondary: #475467;
+  --ink-muted: #5F6C7B;
+  --ink-inverse: #FFFFFF;
+
+  /* Structural hairline dividers */
+  --border-hairline: #E1E3DD;
+  --border-strong: #C6CAC0;
+
+  /* Prussian Cobalt primary action system */
+  --accent: #1B4DFF;
+  --accent-hover: #143BD4;
+  --accent-active: #102FB0;
+  --accent-tint: #EEF3FF;
+  --accent-tint-border: #C4D5FD;
+  --accent-ink: #1032AD;
+
+  /* Semantic state signals (for forecast health & pipeline stage only) */
+  --signal-positive: #0E7454;
+  --signal-positive-bg: #EAF7F1;
+  --signal-positive-border: #B5E3CF;
+
+  --signal-caution: #9F5205;
+  --signal-caution-bg: #FEF6E7;
+  --signal-caution-border: #F4D8A3;
+
+  --signal-critical: #B42318;
+  --signal-critical-bg: #FEF2F1;
+  --signal-critical-border: #F5C3BE;
+
+  --signal-info: #1849A9;
+  --signal-info-bg: #EFF4FF;
+  --signal-info-border: #C5D6FC;
+
+  --signal-neutral: #475467;
+  --signal-neutral-bg: #F1F2EE;
+  --signal-neutral-border: #D5D8D0;
+
+  /* Typography */
+  --font-sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+
+  /* Fixed scale for operational clarity */
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.1875rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 1.875rem;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+
+  /* Elevation (reserved strictly for transient floating drawers & menus) */
+  --shadow-overlay: 0 16px 40px -12px rgba(17, 24, 32, 0.16), 0 4px 12px -4px rgba(17, 24, 32, 0.08);
+  --shadow-popover: 0 10px 24px -6px rgba(17, 24, 32, 0.12);
+
+  /* Layout metrics */
+  --rail-width: 244px;
+  --topbar-height: 58px;
+
+  /* Motion */
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-fast: 140ms;
+  --dur-med: 200ms;
+}
