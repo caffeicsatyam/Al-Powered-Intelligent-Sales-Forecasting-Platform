@@ -128,6 +128,12 @@ class ScoreOut(BaseModel):
     created_at: datetime
 
 
+class AutomatedScoreOut(ScoreOut):
+    feature_rationale: dict[str, str]
+    missing_information: list[str]
+    score_basis: str
+
+
 class RecommendationOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int

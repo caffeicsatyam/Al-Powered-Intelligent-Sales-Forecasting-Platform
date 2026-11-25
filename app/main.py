@@ -46,6 +46,10 @@ app.include_router(outreach.router)
 app.include_router(scroing.router)
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+# Vite emits hashed JS and CSS files under ``/assets``.  The generated
+# ``index.html`` refers to those files from the site root, so expose that
+# directory separately in addition to the existing ``/static`` mount.
+app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
 
 
 @app.get("/")

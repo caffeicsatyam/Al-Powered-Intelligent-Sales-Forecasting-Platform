@@ -99,9 +99,13 @@ def analyze_company(lead):
         contents=prompt
     )
 
-    raw = response.text.strip()
-    raw = raw.removeprefix("```json")
-    raw = raw.removesuffix("```").strip()
+    raw = getattr(response, "text", None)
+    if not isinstance(raw, str) or not raw.strip():
+        raise ValueError("The AI returned an empty company analysis.")
+
+    raw = raw.strip()
+    if raw.startswith("```"):
+        raw = raw.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
     data = json.loads(raw)
 
     data["qualification_score"] = max(
